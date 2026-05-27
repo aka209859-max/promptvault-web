@@ -1,26 +1,222 @@
+/**
+ * PromptVault Web — グローバルスタイルシート
+ *
+ * 読み込み順序（CSS 仕様に従い @import は最上部に配置）:
+ * 1. Google Fonts（Inter + Noto Sans JP）
+ * 2. Tailwind v4 コアインポート
+ * 3. @config — tailwind.config.ts のブランドカラー・フォントを適用
+ * 4. ダークモードバリアント定義
+ * 5. Tailwind テーマトークン（shadcn 互換マッピング）
+ * 6. CSS 変数定義（:root / .dark）
+ * 7. スクロールバー・テキスト選択スタイル
+ * 8. ベーススタイル（body / 全要素トランジション）
+ */
+
+/* ─── Google Fonts ─────────────────────────────────────────────────────────── */
+/* Inter: 英語 UI テキスト用。Noto Sans JP: 日本語テキスト用。           */
+/* display=swap で FOUT（フォント読み込み前のテキスト非表示）を軽減する。  */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+
+/* ─── Tailwind v4 コアインポート ────────────────────────────────────────────── */
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* tailwind.config.ts のブランドカラー・フォント定義を読み込む */
+@config "../tailwind.config.ts";
 
+/* ─── ダークモードバリアント ───────────────────────────────────────────────── */
+/* .dark クラスが付いた要素の子孫に対してダークモードスタイルを適用する。 */
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Tailwind テーマトークン（shadcn 互換）────────────────────────────────── */
+/* shadcn コンポーネントが参照するデザイントークンを CSS 変数にマッピングする。 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ─── CSS 変数定義（ライトモード）──────────────────────────────────────────── */
+:root {
+  /* shadcn 互換トークン（既存コンポーネントとの互換性を維持） */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* ─── PromptVault デザインシステム変数 ──────────────────────────────────── */
+  /* コンポーネントからは var(--color-*) 形式で参照する。                      */
+  --color-bg: #080808;          /* ページ背景（最暗） */
+  --color-surface: #111111;     /* カード・モーダルの背景 */
+  --color-surface-2: #1A1A1A;   /* 入力欄・セカンダリサーフェス */
+  --color-border: #222222;      /* 通常ボーダー */
+  --color-border-glow: #6366F1; /* アクセントカラーのボーダー（フォーカス時等） */
+  --color-text-1: #F0F0F0;      /* プライマリテキスト */
+  --color-text-2: #8A8A8A;      /* セカンダリテキスト・プレースホルダー */
+  --color-text-3: #4A4A4A;      /* ターシャリテキスト・無効状態 */
+  --color-accent: #6366F1;      /* インディゴ — プライマリアクション */
+  --color-accent-hover: #4F46E5; /* アクセントのホバー状態 */
+  --color-success: #10B981;     /* 成功・グリーン */
+  --color-warning: #F59E0B;     /* 警告・アンバー */
+  --color-error: #EF4444;       /* エラー・レッド */
+}
+
+/* ─── CSS 変数定義（ダークモード）──────────────────────────────────────────── */
+/* shadcn コンポーネントのダークテーマ用トークン。 */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* ─── スクロールバー ───────────────────────────────────────────────────────── */
+/* WebKit 系ブラウザ（Chrome・Safari・Edge）向けのカスタムスクロールバー。 */
+/* 幅 6px の細めスタイルでコンテンツの邪魔をしないデザインにする。         */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  /* トラック: サーフェスと同じ暗い背景 */
+  background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  /* つまみ: やや明るめのグレーで視認性を確保 */
+  background: #333333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  /* ホバー時: さらに明るくしてインタラクティブ感を示す */
+  background: #555555;
+}
+
+/* ─── テキスト選択色 ───────────────────────────────────────────────────────── */
+/* テキスト選択時の背景にアクセントカラーを半透明で適用する。 */
+/* rgba(99, 102, 241, 0.3) = #6366F1 の 30% 透過 */
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+/* ─── ベーススタイル ───────────────────────────────────────────────────────── */
+@layer base {
+  /**
+   * 全要素にトランジションを設定する。
+   * ホバー・フォーカス・状態変化（色・背景・ボーダー・シャドウ等）を
+   * 150ms で滑らかにアニメーションさせる。
+   * cubic-bezier(0.4, 0, 0.2, 1) は Material Design 標準のイージング。
+   */
+  * {
+    @apply border-border outline-ring/50;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    /* ページ背景・テキストカラー・フォントをデザインシステム指定値に設定する。 */
+    background-color: #080808;
+    color: #F0F0F0;
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  }
+
+  html {
+    @apply font-sans;
+  }
 }
