@@ -7,6 +7,11 @@
  * 対応イベント:
  *   - checkout.session.completed: 決済完了時に profiles.plan を 'pro' に更新する
  *
+ * ユーザー特定フロー:
+ *   1. Stripe セッションの customer_email を取得
+ *   2. supabaseAdmin.auth.admin.listUsers() で全ユーザーを取得
+ *   3. email が一致するユーザーの ID で profiles テーブルを更新
+ *
  * セキュリティ:
  *   - stripe.webhooks.constructEvent でシグネチャを検証し、
  *     不正なリクエストを 400 で弾く。
@@ -34,6 +39,8 @@ function getStripe(): Stripe {
  * Stripe からの Webhook イベントを受信・処理する。
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // ─── シグネチャ検証 ────────────────────────────────────────────────────────
+
   // リクエストボディを Raw バイト列として取得（署名検証に必要）
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')
@@ -56,60 +63,81 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!,
     )
-  } catch (err) {
+  } catch (err: unknown) {
     const message = err instanceof Error ? err.message : '不明なエラー'
-    console.error('[Webhook] シグネチャ検証エラー:', message)
     return NextResponse.json(
       { error: `Webhook シグネチャ検証失敗: ${message}` },
       { status: 400 },
     )
   }
 
+  // ─── イベント処理 ──────────────────────────────────────────────────────────
+
   try {
-    // イベントの種別に応じて処理を分岐する
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
 
-        // create-checkout/route.ts で metadata に埋め込んだユーザー ID を取得する
-        const userId = session.metadata?.userId
+        // Stripe セッションから顧客のメールアドレスを取得する
+        const customerEmail = session.customer_email
 
-        if (!userId) {
-          console.error('[Webhook] metadata.userId が存在しません', session.id)
-          // ユーザー ID がない場合は処理不可だが Stripe に 200 を返してリトライを防ぐ
+        if (!customerEmail) {
+          // customer_email がない場合はユーザーを特定できないため処理をスキップ。
+          // Stripe に 200 を返してリトライを防ぐ。
           return NextResponse.json({ received: true })
         }
 
-        // サービスロールクライアントで RLS をバイパスして plan を更新する
-        const supabase = createServiceRoleClient()
-        const { error } = await supabase
-          .from('profiles')
-          .update({ plan: 'pro' })
-          .eq('id', userId)
+        // ─── listUsers() でメールアドレスからユーザーを特定する ────────────
+        const supabaseAdmin = createServiceRoleClient()
 
-        if (error) {
-          console.error('[Webhook] profiles 更新エラー:', error.message)
+        // 全ユーザーを取得してメールアドレスで絞り込む。
+        // perPage: 1000 でユーザー数が少ない段階は1ページで全件取得できる。
+        const { data: listData, error: listError } =
+          await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
+
+        if (listError) {
           return NextResponse.json(
-            { error: 'データベース更新に失敗しました' },
+            { error: `ユーザー一覧の取得に失敗しました: ${listError.message}` },
             { status: 500 },
           )
         }
 
-        console.log(`[Webhook] ユーザー ${userId} を pro プランに更新しました`)
+        // メールアドレスが一致するユーザーを検索する
+        const targetUser = listData.users.find(
+          (u) => u.email === customerEmail,
+        )
+
+        if (!targetUser) {
+          // 対応するユーザーが見つからない場合は処理をスキップして 200 を返す
+          return NextResponse.json({ received: true })
+        }
+
+        // ─── profiles テーブルの plan を 'pro' に更新する ─────────────────
+        const { error: updateError } = await supabaseAdmin
+          .from('profiles')
+          .update({ plan: 'pro' })
+          .eq('id', targetUser.id)
+
+        if (updateError) {
+          return NextResponse.json(
+            { error: `データベース更新に失敗しました: ${updateError.message}` },
+            { status: 500 },
+          )
+        }
+
         break
       }
 
       default:
         // 未対応のイベントは無視して 200 を返す（Stripe のリトライ防止）
-        console.log(`[Webhook] 未対応イベントを受信: ${event.type}`)
+        break
     }
 
     return NextResponse.json({ received: true })
-  } catch (err) {
+  } catch (err: unknown) {
     const message = err instanceof Error ? err.message : '不明なエラー'
-    console.error('[Webhook] 処理中エラー:', message)
     return NextResponse.json(
-      { error: '内部サーバーエラー' },
+      { error: `内部サーバーエラー: ${message}` },
       { status: 500 },
     )
   }

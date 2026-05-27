@@ -5,18 +5,21 @@
  * Checkout Session を生成して URL を返す。
  * フロントエンドはその URL にリダイレクトすることで決済フローを開始する。
  *
- * リクエストボディ:
- *   { userId: string }  ← Supabase の auth.uid()（Webhook でプラン更新に使用）
+ * ユーザー取得:
+ *   createServerClient + cookies() を使ってサーバーサイドで認証済みユーザーを
+ *   取得し、メールアドレスを Stripe の customer_email に渡す。
+ *   クライアントから userId を受け取らないため、なりすましリスクを排除できる。
  *
  * レスポンス（成功時）:
- *   { url: string }     ← Stripe が生成した決済ページ URL
+ *   { url: string }  ← Stripe が生成した決済ページ URL
  *
- * セキュリティ:
- *   - userId は Supabase 認証で検証済みであることを前提とする
- *   - Stripe のシークレットキーはサーバーサイドのみで使用し、クライアントに露出しない
+ * レスポンス（失敗時）:
+ *   { error: string }
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import Stripe from 'stripe'
 
 /**
@@ -34,30 +37,53 @@ function getStripe(): Stripe {
  * POST /api/create-checkout
  * Stripe Checkout Session を発行し、決済ページの URL を返す。
  */
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(_request: NextRequest): Promise<NextResponse> {
   try {
-    const body: unknown = await request.json()
+    // ─── サーバーサイドでログインユーザーのメールアドレスを取得する ───────
 
-    // リクエストボディのバリデーション
-    if (
-      typeof body !== 'object' ||
-      body === null ||
-      !('userId' in body) ||
-      typeof (body as Record<string, unknown>).userId !== 'string'
-    ) {
+    // cookies() で Cookie ストアを取得し、Supabase クライアントを生成する。
+    // クライアントから userId を受け取る代わりにサーバーサイドで認証情報を参照することで、
+    // なりすましリスクを排除する。
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          // Route Handler では Cookie の書き込みは不要なため空実装にする
+          setAll() {},
+        },
+      },
+    )
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user || !user.email) {
       return NextResponse.json(
-        { error: 'リクエストボディに userId（string）が必要です' },
-        { status: 400 },
+        { error: '認証されていません。再度ログインしてください。' },
+        { status: 401 },
       )
     }
 
-    const { userId } = body as { userId: string }
+    // ─── Stripe Checkout Session を生成する ──────────────────────────────
 
-    // Stripe クライアントを取得し Checkout Session を生成する
     const stripe = getStripe()
     const session = await stripe.checkout.sessions.create({
       /** 決済モード: subscription（サブスクリプション） */
       mode: 'subscription',
+
+      /**
+       * 顧客のメールアドレス。
+       * Supabase の認証情報から取得したメールアドレスを Stripe に渡す。
+       * Webhook の checkout.session.completed で customer_email として参照される。
+       */
+      customer_email: user.email,
 
       /** 購入する料金プラン（環境変数 STRIPE_PRICE_ID から取得） */
       line_items: [
@@ -69,19 +95,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       /**
        * 決済完了後のリダイレクト先。
-       * 成功時: /success ページ
-       * キャンセル時: /upgrade ページ（決済ポップアップに戻る）
+       * NEXT_PUBLIC_APP_URL に本番 URL を設定すること（例: https://your-app.vercel.app）。
        */
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/upgrade`,
-
-      /**
-       * Webhook 処理で参照するためにユーザー ID を metadata に埋め込む。
-       * checkout.session.completed イベントの session.metadata.userId で取得できる。
-       */
-      metadata: {
-        userId,
-      },
     })
 
     if (!session.url) {
@@ -92,9 +109,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json({ url: session.url })
-  } catch (err) {
+  } catch (err: unknown) {
     const message = err instanceof Error ? err.message : '不明なエラー'
-    console.error('[create-checkout] エラー:', message)
     return NextResponse.json(
       { error: `Checkout Session の作成に失敗しました: ${message}` },
       { status: 500 },

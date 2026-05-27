@@ -8,7 +8,7 @@
  *
  * チェックアウトフロー:
  * 1. "アップグレードする" ボタンをクリック
- * 2. POST /api/create-checkout に userId を送信
+ * 2. POST /api/create-checkout を呼び出す（認証情報はサーバーが cookies から取得）
  * 3. レスポンスの url に window.location.href でリダイレクト
  * 4. Stripe 決済完了後、/success にリダイレクト（cancel_url: /upgrade）
  */
@@ -20,11 +20,11 @@ import { Button } from '@/components/ui/button'
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 
-/** UpgradeClient の Props 型 */
-type UpgradeClientProps = {
-  /** Supabase の auth.uid()。チェックアウト API で metadata に埋め込む */
-  userId: string
-}
+/**
+ * UpgradeClient の Props 型。
+ * サーバーが cookies から認証情報を取得するため、クライアントからの userId 受け渡しは不要。
+ */
+type UpgradeClientProps = Record<string, never>
 
 /**
  * /api/create-checkout のレスポンス型（判別共用体）。
@@ -228,7 +228,7 @@ function PricingCard({
  * アップグレード UI 本体。
  * ヘッダー + Free / Pro 料金カード + チェックアウト処理を内包する。
  */
-export default function UpgradeClient({ userId }: UpgradeClientProps) {
+export default function UpgradeClient(_props: UpgradeClientProps) {
   const router = useRouter()
 
   // ─── 状態管理 ────────────────────────────────────────────────────────────
@@ -248,10 +248,10 @@ export default function UpgradeClient({ userId }: UpgradeClientProps) {
     setError(null)
 
     try {
+      // 認証情報（ユーザーのメールアドレス）はサーバーが cookies から取得するため、
+      // リクエストボディには何も含める必要がない
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
       })
 
       // レスポンスを判別共用体として型付けする

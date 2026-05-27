@@ -6,9 +6,10 @@
  * 2. getUser() で認証チェック → 未認証の場合は /login にリダイレクト
  * 3. profiles テーブルから plan を取得
  * 4. plan === 'pro' のユーザーはすでにアップグレード済みのため /dashboard にリダイレクト
- * 5. userId を UpgradeClient に渡す（チェックアウト API 呼び出しで使用）
+ * 5. UpgradeClient をレンダリング（props なし）
  *
- * userId をサーバーサイドで取得することで、クライアントへの露出リスクを低減する。
+ * Checkout API はサーバーサイドで cookies から認証情報を取得するため、
+ * UpgradeClient への userId の受け渡しは不要。
  */
 
 import { redirect } from 'next/navigation'
@@ -18,7 +19,7 @@ import UpgradeClient from './upgrade-client'
 /**
  * アップグレードページ。
  * 認証とプランチェックをサーバーサイドで行い、
- * UpgradeClient に userId を安全に渡す。
+ * Pro プランのユーザーはダッシュボードへリダイレクトする。
  */
 export default async function UpgradePage() {
   // ─── 認証チェック ──────────────────────────────────────────────────────────
@@ -47,6 +48,8 @@ export default async function UpgradePage() {
     redirect('/dashboard')
   }
 
-  // ─── クライアントコンポーネントに userId を渡す ────────────────────────────
-  return <UpgradeClient userId={user.id} />
+  // ─── クライアントコンポーネントをレンダリング ──────────────────────────────
+  // create-checkout API がサーバーサイドで cookies から認証情報を取得するため、
+  // UpgradeClient への props は不要
+  return <UpgradeClient />
 }
