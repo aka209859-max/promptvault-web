@@ -5,7 +5,7 @@
  *
  * LP の言語状態（JP/EN）を保持し、全セクションコンポーネントに
  * lang プロップとして伝播させる "use client" ラッパー。
- * Navbar には setLang も渡して言語切り替えを可能にする。
+ * Navbar には setLang と user も渡して言語切り替えとログイン状態 UI を実現する。
  *
  * レンダリング構成:
  *   Navbar（固定ヘッダー）
@@ -19,6 +19,7 @@
  */
 
 import { useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import Navbar from './navbar'
 import Hero from './hero'
 import Problem from './problem'
@@ -33,6 +34,12 @@ import Footer from './footer'
 /** Lang 型（各ファイルでローカル宣言） */
 type Lang = 'jp' | 'en'
 
+/** LandingPageClient の Props 型 */
+type LandingPageClientProps = {
+  /** サーバーサイドで取得したログインユーザー。未ログイン時は null。 */
+  user: User | null
+}
+
 // ─── メインコンポーネント ─────────────────────────────────────────────────────
 
 /**
@@ -40,14 +47,14 @@ type Lang = 'jp' | 'en'
  * lang 状態を保持し、全セクションに props として伝播する。
  * デフォルト言語は 'jp'。
  */
-export default function LandingPageClient() {
+export default function LandingPageClient({ user }: LandingPageClientProps) {
   /** 言語状態: 'jp'（デフォルト）| 'en' */
   const [lang, setLang] = useState<Lang>('jp')
 
   return (
     <div style={{ backgroundColor: '#080808', minHeight: '100vh' }}>
       {/* ── ナビバー（fixed で常時表示） ────────────────────────────────── */}
-      <Navbar lang={lang} setLang={setLang} />
+      <Navbar lang={lang} setLang={setLang} user={user} />
 
       {/* ── ナビバーの高さ（64px）分のパディングオフセット ────────────── */}
       <div style={{ paddingTop: '64px' }}>

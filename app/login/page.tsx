@@ -194,10 +194,11 @@ export default function LoginPage() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // 認証完了後の戻り先を指定する。
+          // PKCE フローでは認可コード（?code=）を受け取るコールバックルートを指定する。
           // window.location.origin は Vercel プレビューや SSR 環境で不定になるため、
           // 環境変数 NEXT_PUBLIC_SITE_URL を優先し、未設定時はローカル開発用 URL にフォールバックする。
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/dashboard`,
+          // /auth/callback でコードをセッションに交換後、自動的に /dashboard へ遷移する。
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/callback`,
         },
       })
 
