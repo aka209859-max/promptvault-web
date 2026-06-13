@@ -9,7 +9,8 @@
 - [x] 環境変数テンプレート（.env.example）作成
 
 ## フェーズ2：認証 + 課金 UI（完了）
-- [x] /login 認証ページ実装
+- [x] /login 認証ページ実装（マジックリンク方式に変更済み）
+- [x] ログイン方式をマジックリンク（Email OTP）に変更（Google OAuth 廃止）
 - [x] /dashboard ダッシュボード実装
 - [x] /upgrade アップグレードページ（Stripe Checkout 連携）実装
 - [x] /success 決済完了ページ実装
