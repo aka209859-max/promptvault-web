@@ -394,46 +394,339 @@ export default function DashboardClient({
           }}
         >
           {prompts.length === 0 ? (
-            /* ─── 空の状態（0件時） ─────────────────────────────────────────── */
-            <div
-              style={{
-                padding: '80px 24px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '16px',
-                textAlign: 'center',
-              }}
-            >
-              {/* コマンドプロンプト風のアイコン意匠 */}
+            /* ─── クイックスタートガイド（新規ユーザー向けオンボーディング） ── */
+            <>
+              {/* モバイルでステップカードを縦積みにするレスポンシブ CSS */}
+              <style>{`
+                @media (max-width: 720px) {
+                  .pv-onboarding-grid {
+                    grid-template-columns: 1fr !important;
+                  }
+                }
+              `}</style>
+
               <div
                 style={{
-                  fontFamily: "'Courier New', monospace",
-                  fontSize: '28px',
-                  color: '#555555',
-                  letterSpacing: '0.08em',
-                  userSelect: 'none',
+                  padding: '48px 32px 56px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '36px',
                 }}
-                aria-hidden="true"
               >
-                {'> _'}
+                {/* ── ヘッダー ──────────────────────────────────────────────── */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '10px',
+                    textAlign: 'center',
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontSize: '22px',
+                      fontWeight: 700,
+                      color: '#F0F0F0',
+                      margin: 0,
+                      letterSpacing: '-0.3px',
+                    }}
+                  >
+                    PromptVaultへようこそ！👋
+                  </h2>
+                  <p style={{ fontSize: '14px', color: '#8A8A8A', margin: 0 }}>
+                    まずは基本的な使い方をマスターしましょう。
+                  </p>
+                </div>
+
+                {/* ── 3ステップカード ──────────────────────────────────────── */}
+                <div
+                  className="pv-onboarding-grid"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '16px',
+                    width: '100%',
+                    maxWidth: '780px',
+                  }}
+                >
+                  {/* ── Step 1: プロンプトを登録する（アクティブ） ── */}
+                  <div
+                    style={{
+                      backgroundColor: '#1A1A1A',
+                      border: '1px solid rgba(99,102,241,0.35)',
+                      borderRadius: '12px',
+                      padding: '24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '14px',
+                    }}
+                  >
+                    {/* ステップバッジ + タイトル */}
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                      <div
+                        style={{
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '50%',
+                          backgroundColor: '#6366F1',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: '#fff',
+                          flexShrink: 0,
+                        }}
+                        aria-hidden="true"
+                      >
+                        1
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#A5B4FC',
+                          letterSpacing: '0.02em',
+                        }}
+                      >
+                        Step 1
+                      </span>
+                    </div>
+
+                    {/* アイコン */}
+                    <div
+                      style={{ fontSize: '28px', lineHeight: 1 }}
+                      aria-hidden="true"
+                    >
+                      📝
+                    </div>
+
+                    {/* タイトル */}
+                    <p
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#F0F0F0',
+                        margin: 0,
+                      }}
+                    >
+                      プロンプトを登録する
+                    </p>
+
+                    {/* 説明文 */}
+                    <p
+                      style={{
+                        fontSize: '13px',
+                        color: '#8A8A8A',
+                        margin: 0,
+                        lineHeight: 1.65,
+                        flex: 1,
+                      }}
+                    >
+                      右上のボタンから、よく使う文章や AI への指示を登録しましょう。
+                    </p>
+
+                    {/* 追加 CTA ボタン */}
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleOpenAdd}
+                      style={{ width: '100%', marginTop: '4px' }}
+                    >
+                      最初のプロンプトを追加 →
+                    </Button>
+                  </div>
+
+                  {/* ── Step 2: Chrome 拡張機能を準備する（未完了） ── */}
+                  <div
+                    style={{
+                      backgroundColor: '#1A1A1A',
+                      border: '1px solid #2A2A2A',
+                      borderRadius: '12px',
+                      padding: '24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '14px',
+                    }}
+                  >
+                    {/* ステップバッジ + ラベル */}
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                      <div
+                        style={{
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '50%',
+                          backgroundColor: '#2A2A2A',
+                          border: '1px solid #3A3A3A',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: '#6A6A6A',
+                          flexShrink: 0,
+                        }}
+                        aria-hidden="true"
+                      >
+                        2
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#6A6A6A',
+                          letterSpacing: '0.02em',
+                        }}
+                      >
+                        Step 2
+                      </span>
+                    </div>
+
+                    {/* アイコン */}
+                    <div
+                      style={{ fontSize: '28px', lineHeight: 1 }}
+                      aria-hidden="true"
+                    >
+                      🧩
+                    </div>
+
+                    {/* タイトル */}
+                    <p
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#C0C0C0',
+                        margin: 0,
+                      }}
+                    >
+                      Chrome 拡張機能を準備する
+                    </p>
+
+                    {/* 説明文 */}
+                    <p
+                      style={{
+                        fontSize: '13px',
+                        color: '#8A8A8A',
+                        margin: 0,
+                        lineHeight: 1.65,
+                        flex: 1,
+                      }}
+                    >
+                      すぐに呼び出せるように拡張機能をブラウザに追加します。
+                    </p>
+
+                    {/* 準備中ボタン（無効化） */}
+                    <button
+                      type="button"
+                      disabled
+                      aria-label="Chrome Web Store（準備中）"
+                      style={{
+                        marginTop: '4px',
+                        width: '100%',
+                        padding: '7px 12px',
+                        backgroundColor: '#222222',
+                        border: '1px solid #2A2A2A',
+                        borderRadius: '8px',
+                        color: '#4A4A4A',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        cursor: 'not-allowed',
+                        textAlign: 'center',
+                      }}
+                    >
+                      準備中...
+                    </button>
+                  </div>
+
+                  {/* ── Step 3: どこでも「/」で呼び出す ── */}
+                  <div
+                    style={{
+                      backgroundColor: '#1A1A1A',
+                      border: '1px solid #2A2A2A',
+                      borderRadius: '12px',
+                      padding: '24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '14px',
+                    }}
+                  >
+                    {/* ステップバッジ + ラベル */}
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                      <div
+                        style={{
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '50%',
+                          backgroundColor: '#2A2A2A',
+                          border: '1px solid #3A3A3A',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: '#6A6A6A',
+                          flexShrink: 0,
+                        }}
+                        aria-hidden="true"
+                      >
+                        3
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#6A6A6A',
+                          letterSpacing: '0.02em',
+                        }}
+                      >
+                        Step 3
+                      </span>
+                    </div>
+
+                    {/* アイコン */}
+                    <div
+                      style={{ fontSize: '28px', lineHeight: 1 }}
+                      aria-hidden="true"
+                    >
+                      ⚡
+                    </div>
+
+                    {/* タイトル */}
+                    <p
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#C0C0C0',
+                        margin: 0,
+                      }}
+                    >
+                      どこでも「/」で呼び出す
+                    </p>
+
+                    {/* 説明文 */}
+                    <p
+                      style={{
+                        fontSize: '13px',
+                        color: '#8A8A8A',
+                        margin: 0,
+                        lineHeight: 1.65,
+                        flex: 1,
+                      }}
+                    >
+                      ChatGPT やメール画面など、あらゆる入力欄で「/（スラッシュ）」を打つとプロンプトを展開できます。
+                    </p>
+                  </div>
+                </div>
               </div>
-              <p style={{ fontSize: '14px', color: '#C0C0C0', margin: 0 }}>
-                まだプロンプトがありません
-              </p>
-              <p style={{ fontSize: '13px', color: '#8A8A8A', margin: 0 }}>
-                スラッシュコマンドで素早く呼び出せるプロンプトを登録しましょう
-              </p>
-              {/* 初動用の追加ボタン */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleOpenAdd}
-                style={{ marginTop: '8px', color: '#6366F1' }}
-              >
-                最初のプロンプトを追加 →
-              </Button>
-            </div>
+            </>
           ) : (
             /* ─── プロンプトテーブル ───────────────────────────────────────── */
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
