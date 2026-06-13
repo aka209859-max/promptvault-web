@@ -453,7 +453,7 @@ export default function DashboardClient({
                         textAlign: 'left',
                         fontSize: '11px',
                         fontWeight: 700,
-                        color: '#4A4A4A',
+                        color: '#8A8A8A',
                         letterSpacing: '0.05em',
                         width: width,
                       }}
@@ -571,7 +571,7 @@ export default function DashboardClient({
                               padding: '6px',
                               borderRadius: '4px',
                             }}
-                            className="text-[#4A4A4A] hover:text-[#6366F1]"
+                            className="text-[#8A8A8A] hover:text-[#6366F1]"
                             aria-label={`${prompt.title}を編集`}
                           >
                             <Pencil size={14} aria-hidden="true" />
@@ -588,7 +588,7 @@ export default function DashboardClient({
                               padding: '6px',
                               borderRadius: '4px',
                             }}
-                            className="text-[#4A4A4A] hover:text-[#EF4444]"
+                            className="text-[#8A8A8A] hover:text-[#EF4444]"
                             aria-label={`${prompt.title}を削除`}
                           >
                             <Trash2 size={14} aria-hidden="true" />
