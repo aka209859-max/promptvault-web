@@ -410,7 +410,7 @@ export default function DashboardClient({
                 style={{
                   fontFamily: "'Courier New', monospace",
                   fontSize: '28px',
-                  color: '#333333',
+                  color: '#555555',
                   letterSpacing: '0.08em',
                   userSelect: 'none',
                 }}
@@ -418,10 +418,10 @@ export default function DashboardClient({
               >
                 {'> _'}
               </div>
-              <p style={{ fontSize: '14px', color: '#4A4A4A', margin: 0 }}>
+              <p style={{ fontSize: '14px', color: '#C0C0C0', margin: 0 }}>
                 まだプロンプトがありません
               </p>
-              <p style={{ fontSize: '13px', color: '#333333', margin: 0 }}>
+              <p style={{ fontSize: '13px', color: '#8A8A8A', margin: 0 }}>
                 スラッシュコマンドで素早く呼び出せるプロンプトを登録しましょう
               </p>
               {/* 初動用の追加ボタン */}
